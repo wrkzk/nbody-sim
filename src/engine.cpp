@@ -8,15 +8,15 @@
 
 // Struct representing an arbitrary body
 struct Body {
-    glm::vec2 position;
-    glm::vec2 velocity;
+    glm::vec3 position;
+    glm::vec3 velocity;
     float mass;
     float radius;
 };
 
 // Time step and gravitational constants
 const float dt = 0.00005;
-const float G = 500000.0f;
+const float G = 5000000.0f;
 
 // Window width and height
 const int width = 1500;
@@ -26,105 +26,121 @@ const int height = 1000;
 int main() {
     InitWindow(width, height, "N-Body Physics Simulator");
 
-    // Center of the window
-    glm::vec2 center = {width / 2, height / 2};
-    
-    // Initial velocity vectors     
-    glm::vec2 v1 = {0.466203685f, 0.43236573f};
-    glm::vec2 v2 = v1;
-    glm::vec2 v3 = -2.0f * v1;
-    
     // Three bodies with interesting initial conditions respresenting the 3-body problem
-    Body b1 = { center + glm::vec2(0.9700436f, -0.24308753f) * 100.0f, v1 * 100.0f, 1.0f, 10.0f };
-    Body b2 = { center + glm::vec2(-0.9700436f, 0.24308753f) * 100.0f, v2 * 100.0f, 4.0f, 10.0f };
-    Body b3 = { center, v3 * 100.0f, 1.0f, 10.0f };
+    Body b0 = { glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 30.0f, 4.0f };
+    Body b1 = { glm::vec3(10.0f, 0.0f, 0.0f), glm::vec3(0.0f, -2000.0f, 0.0f), 10.0f, 0.8f };
+    Body b2 = { glm::vec3(-10.0f, 0.0f, 0.0f), glm::vec3(0.0f, 2000.0f, 0.0f), 10.0f, 0.8f };
+    Body b3 = { glm::vec3(0.0f, 10.0f, 0.0f), glm::vec3(2000.0f, 0.0f, 0.0f), 10.0f, 0.8f };
+    Body b4 = { glm::vec3(0.0f, -10.0f, 0.0f), glm::vec3(-2000.0f, 0.0f, 0.0f), 10.0f, 0.8f };
+
 
     // All the bodies are contained in the world vector
-    std::vector<Body> world = {b1, b2, b3};
+    std::vector<Body> world = {b1, b2, b3, b4};
 
     // Set up raylib camera
-    Camera2D camera = { 0 };
-    camera.target = {width / 2.0f, height / 2.0f};
-    camera.offset.x = width / 2.0f;
-    camera.offset.y = height / 2.0f;
-    camera.zoom = 1.0f;
+    Camera3D camera = { 0 };
+    camera.position = (Vector3){ 0.0f, 10.0f, 10.0f };
+    camera.target = (Vector3){ 0.0f, 0.0f, 0.0f };
+    camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };
+    camera.fovy = 45.0f;
     Vector2 prevMousePos = GetMousePosition();
+    camera.projection = CAMERA_PERSPECTIVE;
 
-    float accumulator = 0.0f;
+    float rotAngle = 45;
+    float tiltAngle = 45;
+    float camDist = 30;
+
+    SetTargetFPS(60);
     while (!WindowShouldClose()) {
 
         // ------- Raylib camera panning and zoom -------
         
         // Calculate new camera zoom amount
         float wheelDelta = GetMouseWheelMove();
-        float newZoom = camera.zoom + wheelDelta * 0.01f;
-        if (newZoom <= 0) {
-            newZoom = 0.01f;
+        camDist = camDist + wheelDelta;
+        if (camDist <= 0) {
+            camDist = 0.01f;
         }
-        camera.zoom = newZoom;
 
         // Panning logic
+        Vector3 camPos = {0, 0, camDist};
         Vector2 curMousePos = GetMousePosition();
         Vector2 mouseDelta = prevMousePos - curMousePos;
         prevMousePos = curMousePos;
 
-        if (IsMouseButtonDown(0)) {
-            camera.target = GetScreenToWorld2D(Vector2Add(camera.offset, mouseDelta), camera);
-        }
+        
+        rotAngle += mouseDelta.x * 0.25f;
+        tiltAngle += mouseDelta.y * 0.25f;
+
+        if (tiltAngle > 89)
+            tiltAngle = 89;
+
+        if (tiltAngle < 1)
+            tiltAngle = 1;
+
+        Matrix tiltMatrix = MatrixRotateX(tiltAngle * GetFrameTime());
+        Matrix rotMatrix = MatrixRotateY(rotAngle * GetFrameTime());
+        Matrix rot = MatrixMultiply(tiltMatrix, rotMatrix);
+
+        camera.position = Vector3Transform(camPos, rot);
+
+        //if (IsMouseButtonDown(0)) {
+        //    camera.target = GetScreenToWorld2D(Vector2Add(camera.offset, mouseDelta), camera);
+        //}
+        
+
 
         // ----------------------------------------------
 
 
         // --- Physics Logic ---
 
-        accumulator += GetFrameTime();
-        while (accumulator >= dt) {
-            for (int i = 0; i < world.size(); i++) {
+        for (int i = 0; i < world.size(); i++) {
 
                 // Total net force is stored for each body
-                glm::vec2 net_force = { 0, 0 };
+            glm::vec3 net_force = { 0, 0, 0 };
                 
                 // Calculate the force for each other body in the world vector
-                for (int j = 0; j < world.size(); j++) {
-                    if (i == j) continue;
+            for (int j = 0; j < world.size(); j++) {
+                if (i == j) continue;
 
                     // Newton's Law of Universal Gravitation
-                    float distance = glm::distance(world[i].position, world[j].position);
-                    float force = G * ((world[i].mass * world[j].mass) / (distance * distance));
+                float distance = glm::distance(world[i].position, world[j].position);
+                float force = G * ((world[i].mass * world[j].mass) / (distance * distance));
                     
                     // Find directional unit vector between centers of masses and add total force
-                    glm::vec2 dir = glm::normalize(world[j].position - world[i].position);
-                    net_force += dir * force;
-                }
+                glm::vec3 dir = glm::normalize(world[j].position - world[i].position);
+                net_force += dir * force;
+            }
                 
-                // Use F = ma to calculate the acceleration vector for the current body
-                // Then multiply acceleration by the timestep and increment the bodies velocity
-                glm::vec2 accel = net_force / world[i].mass;
-                world[i].velocity += accel * dt;
-            }
-            
-            // Now that velocity has been updated for all of the bodies, update their positions
-            for (int i = 0; i < world.size(); i++) {
-                world[i].position += world[i].velocity * dt;
-            }
-            
-            // Update at a consistent framerate
-            accumulator -= dt;
+            // Use F = ma to calculate the acceleration vector for the current body
+            // Then multiply acceleration by the timestep and increment the bodies velocity
+            glm::vec3 accel = net_force / world[i].mass;
+            world[i].velocity += accel * dt;
         }
+        
+        // Now that velocity has been updated for all of the bodies, update their positions
+        for (int i = 0; i < world.size(); i++) {
+            world[i].position += world[i].velocity * dt;
+        }
+            
 
         // ---- Drawing Logic ----
         
         // Call raylib functions that initialize canvas for drawing (port to OpenGL eventually)
         BeginDrawing();
         ClearBackground(BLACK);
-        BeginMode2D(camera);
-        
+        BeginMode3D(camera);
+
+        DrawSphere( (Vector3){0, 0, 0}, 0.5f, BLUE);
+
         // Draw each of the bodies at the correct position with a specified radius
         for (int i = 0; i < world.size(); i++) {
-            DrawCircle(world[i].position.x, world[i].position.y, world[i].radius, RED);
+            Vector3 center = { world[i].position.x, world[i].position.y, world[i].position.z };
+            DrawSphere(center, world[i].radius, RED);
         }
 
-        EndMode2D();
+        EndMode3D();
         EndDrawing();
     }
 

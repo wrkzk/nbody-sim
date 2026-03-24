@@ -3,6 +3,7 @@
 #include <glm/geometric.hpp>
 #include <glm/glm.hpp>
 #include <raylib.h>
+#include <raymath.h>
 #include <vector>
 
 // Struct representing an arbitrary body
@@ -41,9 +42,40 @@ int main() {
     // All the bodies are contained in the world vector
     std::vector<Body> world = {b1, b2, b3};
 
+    // Set up raylib camera
+    Camera2D camera = { 0 };
+    camera.offset.x = 0;
+    camera.offset.y = 0;
+    camera.zoom = 1.0f;
+    Vector2 prevMousePos = GetMousePosition();
+
     float accumulator = 0.0f;
-    while (!WindowShouldClose())
-    {
+    while (!WindowShouldClose()) {
+
+        // ------- Raylib camera panning and zoom -------
+        
+        // Calculate new camera zoom amount
+        float wheelDelta = GetMouseWheelMove();
+        float newZoom = camera.zoom + wheelDelta * 0.01f;
+        if (newZoom <= 0) {
+            newZoom = 0.01f;
+        }
+        camera.zoom = newZoom;
+
+        // Panning logic
+        Vector2 curMousePos = GetMousePosition();
+        Vector2 mouseDelta = prevMousePos - curMousePos;
+        prevMousePos = curMousePos;
+
+        if (IsMouseButtonDown(0)) {
+            camera.target = GetScreenToWorld2D(Vector2Add(camera.offset, mouseDelta), camera);
+        }
+
+        // ----------------------------------------------
+
+
+        // --- Physics Logic ---
+
         accumulator += GetFrameTime();
         while (accumulator >= dt) {
             for (int i = 0; i < world.size(); i++) {
@@ -75,18 +107,23 @@ int main() {
                 world[i].position += world[i].velocity * dt;
             }
             
-            // Update at a consitent framerate
+            // Update at a consistent framerate
             accumulator -= dt;
         }
+
+        // ---- Drawing Logic ----
         
         // Call raylib functions that initialize canvas for drawing (port to OpenGL eventually)
         BeginDrawing();
         ClearBackground(BLACK);
+        BeginMode2D(camera);
         
         // Draw each of the bodies at the correct position with a specified radius
         for (int i = 0; i < world.size(); i++) {
             DrawCircle(world[i].position.x, world[i].position.y, world[i].radius, RED);
         }
+
+        EndMode2D();
         EndDrawing();
     }
 

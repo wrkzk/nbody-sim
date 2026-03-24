@@ -14,9 +14,9 @@ struct Body {
     float radius;
 };
 
-// Time step and gravitational constants
-const float dt = 0.00005;
-const float G = 5000000.0f;
+// Time step and gravitational constants, softening factor
+const float dt = 0.016;
+const float G = 1.0f; // Increasing G increases simulation speed
 const float softening = 1.0f;
 
 // Window width and height
@@ -28,12 +28,12 @@ int main() {
     InitWindow(width, height, "N-Body Physics Simulator");
 
     // Three bodies with interesting initial conditions respresenting the 3-body problem
-    Body b0 = { glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 20.0f, 2.0f };
-    Body b1 = { glm::vec3(10.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, -3000.0f), 10.0f, 0.8f };
-    Body b2 = { glm::vec3(-10.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 3000.0f), 10.0f, 0.8f };
-    Body b3 = { glm::vec3(0.0f, 0.0f, 10.0f), glm::vec3(3000.0f, 0.0f, 0.0f), 10.0f, 0.8f };
-    Body b4 = { glm::vec3(0.0f, 0.0f, -10.0f), glm::vec3(-3000.0f, 0.0f, 0.0f), 10.0f, 0.8f };
-    Body b5 = { glm::vec3(0.0f, 10.0f, 0.0f), glm::vec3(3000.0f, 0.0f, 0.0f), 10.0f, 0.8f };
+    Body b0 = { glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 5000.0f, 2.0f };
+    Body b1 = { glm::vec3(10.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, -20.0f), 10.0f, 0.8f };
+    Body b2 = { glm::vec3(-10.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 20.0f), 10.0f, 0.8f };
+    Body b3 = { glm::vec3(0.0f, 0.0f, 10.0f), glm::vec3(20.0f, 0.0f, 0.0f), 10.0f, 0.8f };
+    Body b4 = { glm::vec3(0.0f, 0.0f, -10.0f), glm::vec3(-20.0f, 0.0f, 0.0f), 10.0f, 0.8f };
+    Body b5 = { glm::vec3(0.0f, 10.0f, 0.0f), glm::vec3(20.0f, 0.0f, 0.0f), 10.0f, 0.8f };
 
 
     // All the bodies are contained in the world vector

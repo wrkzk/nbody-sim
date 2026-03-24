@@ -44,8 +44,9 @@ int main() {
 
     // Set up raylib camera
     Camera2D camera = { 0 };
-    camera.offset.x = 0;
-    camera.offset.y = 0;
+    camera.target = {width / 2.0f, height / 2.0f};
+    camera.offset.x = width / 2.0f;
+    camera.offset.y = height / 2.0f;
     camera.zoom = 1.0f;
     Vector2 prevMousePos = GetMousePosition();
 

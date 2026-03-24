@@ -29,15 +29,19 @@ int main() {
 
     // Three bodies with interesting initial conditions respresenting the 3-body problem
     Body b0 = { glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 5000.0f, 2.0f };
-    Body b1 = { glm::vec3(10.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, -20.0f), 10.0f, 0.8f };
-    Body b2 = { glm::vec3(-10.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 20.0f), 10.0f, 0.8f };
-    Body b3 = { glm::vec3(0.0f, 0.0f, 10.0f), glm::vec3(20.0f, 0.0f, 0.0f), 10.0f, 0.8f };
-    Body b4 = { glm::vec3(0.0f, 0.0f, -10.0f), glm::vec3(-20.0f, 0.0f, 0.0f), 10.0f, 0.8f };
-    Body b5 = { glm::vec3(0.0f, 10.0f, 0.0f), glm::vec3(20.0f, 0.0f, 0.0f), 10.0f, 0.8f };
+    Body b1 = { glm::vec3(10.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, -15.0f), 10.0f, 0.8f };
+    Body b2 = { glm::vec3(-10.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 15.0f), 10.0f, 0.8f };
+    Body b3 = { glm::vec3(0.0f, 0.0f, 10.0f), glm::vec3(15.0f, 0.0f, 0.0f), 10.0f, 0.8f };
+    Body b4 = { glm::vec3(0.0f, 0.0f, -10.0f), glm::vec3(-15.0f, 0.0f, 0.0f), 10.0f, 0.8f };
+
+    Body b6 = { glm::vec3(7.071f, 0.0f, 7.071f), glm::vec3(-14.14f, 0.0f, 14.14f), 10.0f, 0.8f };
+    Body b7 = { glm::vec3(7.071f, 0.0f, -7.071f), glm::vec3(14.14f, 0.0f, 14.14f), 10.0f, 0.8f };
+    Body b8 = { glm::vec3(-7.071f, 0.0f, 7.071f), glm::vec3(-14.14f, 0.0f, -14.14f), 10.0f, 0.8f };
+    Body b9 = { glm::vec3(-7.071f, 0.0f, -7.071f), glm::vec3(14.14f, 0.0f, -14.14f), 10.0f, 0.8f };
 
 
     // All the bodies are contained in the world vector
-    std::vector<Body> world = {b0, b1, b2, b3, b4};
+    std::vector<Body> world = {b0, b1, b2, b3, b4, b6, b7, b8, b9};
 
     // Set up raylib camera
     Camera3D camera = { 0 };
@@ -130,7 +134,7 @@ int main() {
         ClearBackground(BLACK);
         BeginMode3D(camera);
 
-        DrawGrid(50, 1);
+        DrawGrid(100, 5);
 
         // Draw each of the bodies at the correct position with a specified radius
         for (int i = 0; i < world.size(); i++) {

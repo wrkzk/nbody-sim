@@ -1,5 +1,6 @@
 #include <cmath>
 #include <cstdlib>
+#include <glm/detail/qualifier.hpp>
 #include <glm/ext/vector_float2.hpp>
 #include <glm/fwd.hpp>
 #include <glm/geometric.hpp>
@@ -165,6 +166,23 @@ int main() {
 
 
         // ----------------------------------------------
+        
+        // --- Physics Logic (Barnes-Hut)
+        
+        
+        glm::vec3 origin = {0.0f, 0.0f, 0.0f};
+
+        // Determine the size of the root node cube
+        float maxDist, minDist = 0.0f;
+        glm::vec3 maxVec, minVec;        
+
+        for (int i = 0; i < world.size(); i++) {
+        }
+        
+        // Create the octree
+        Node *octree = constructOctree(world, origin, 1000.0f);
+        
+        // Calculate forces on the current body
 
         
         // --- Physics Logic (Naive )---

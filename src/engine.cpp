@@ -1,3 +1,5 @@
+#include <cmath>
+#include <cstdlib>
 #include <glm/ext/vector_float2.hpp>
 #include <glm/fwd.hpp>
 #include <glm/geometric.hpp>
@@ -7,12 +9,27 @@
 #include <vector>
 
 // Struct representing an arbitrary body
-struct Body {
+typedef struct Body {
     glm::vec3 position;
     glm::vec3 velocity;
     float mass;
     float radius;
-};
+} Body;
+
+// Octree node
+typedef struct Node {
+    
+    // Stores pointers to all sub-nodes of the octree
+    Node *ne, *nw, *sw, *se;
+    Node *ne2, *nw2, *sw2, *se2;
+
+    // Optionally stores pointer to body
+    Body *body;
+
+    // Store the width of the region of space the node represents
+    float width;
+
+} Node;
 
 // Time step and gravitational constants, softening factor
 const float dt = 0.016;
@@ -22,6 +39,62 @@ const float softening = 1.0f;
 // Window width and height
 const int width = 1500;
 const int height = 1000;
+
+/* Iterates through the world vector and constructs the Octree that represents all bodies in 3D space
+ *      params: world (vector of all bodies)
+ *      returns: pointer to root node of octree
+ */
+Node *constructOctree(std::vector<Body> world, glm::vec3 midpoint, float width) {
+    
+    // Base case 1: world is empty
+    if (world.size() == 0) {
+        Node *emptyNode = (Node *) malloc(sizeof(Node));
+        emptyNode->width = width;
+        return emptyNode;
+    }
+    
+    // Base case 2: world contains 1 body
+    else if (world.size() == 1) {
+        Node *node = (Node *) malloc(sizeof(Node));
+        node->body = &world[1];
+        node->width = width;
+        return node;
+    }
+    
+    // Else: split into 8 vectors depending on position and call recursively on each
+    else {
+        
+        // Separate points out into quadrants
+        std::vector<Body> ne, nw, sw, se;
+        std::vector<Body> ne2, nw2, sw2, se2;
+
+        while (world.size() > 0) {
+            Body curr = world.back();
+
+            // Case for if point is in rear 'layer'
+                // Determine which of the 4 quadrants it goes into
+                
+
+            // Case for if point is in top 'layer'
+                // Determine which of the 4 quadrants it goes into
+
+        }
+
+        Node *node = (Node *) malloc(sizeof(Node));
+
+        node->ne = constructOctree(ne, width / 2);
+        node->nw = constructOctree(nw, width / 2);
+        node->sw = constructOctree(sw, width / 2);
+        node->se = constructOctree(se, width / 2);
+
+        node->ne2 = constructOctree(ne, width / 2);
+        node->nw2 = constructOctree(nw, width / 2);
+        node->sw2 = constructOctree(sw, width / 2);
+        node->se2 = constructOctree(se, width / 2);
+
+        return node;
+    }
+}
 
 // Main loop
 int main() {
@@ -93,15 +166,15 @@ int main() {
 
         // ----------------------------------------------
 
-
-        // --- Physics Logic ---
+        
+        // --- Physics Logic (Naive )---
 
         for (int i = 0; i < world.size(); i++) {
 
-                // Total net force is stored for each body
+            // Total net force is stored for each body
             glm::vec3 net_force = { 0, 0, 0 };
                 
-                // Calculate the force for each other body in the world vector
+            // Calculate the force for each other body in the world vector
             for (int j = 0; j < world.size(); j++) {
                 if (i == j) continue;
 

@@ -1,5 +1,8 @@
 # N-Body Physics Simulator
-This is a simple n-body physics simulator. It is currently in very early stages, and the core physics logic is still in progress.
+This is a simple n-body physics simulator. It is currently in very early stages, and the core physics logic is still in progress. I'm using `raylib` to manage the OpenGL graphics setup and usage, and implementing the custom physics logic.
+
+## Images
+![Screenshot of plane with 8 orbiting bodies](assets/screenshot1.png)
 
 ## Planned Features
 - [ ] More advanced camera dynamics such as panning
